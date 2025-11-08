@@ -206,6 +206,62 @@ To solve these issues, we can use gradient boosting and random forests. But noti
 
 ---
 
+## Gradient-Boosted Trees
+
+![Gradient Boosting Illustration](imgs/GBT.png)
+
+Gradient-boosted trees take the basic decision tree idea and turn it into a **sequence of weak learners** that correct each other’s mistakes. Instead of building a single, deep tree, we build many small trees one after another. Each new tree looks at where the previous trees predicted incorrectly and tries to reduce that error.
+
+### Process
+
+1. Start with a single, simple tree that predicts all outputs roughly.
+
+2. Compute the residuals—the difference between predicted values and the true labels.
+
+3. Train a new tree to predict these residuals.
+
+4. Add this tree’s predictions to the previous ones, usually scaled by a learning rate (\eta):
+
+   $$
+   \hat{y}*{new} = \hat{y}*{old} + \eta \cdot \text{tree output}
+   $$
+
+5. Repeat steps 2–4 for a fixed number of trees or until residuals are small enough.
+
+Intuition: each tree **focuses only on the mistakes of the ensemble so far**, gradually improving the model. The small size of each tree and the learning rate prevent overfitting, even when we build hundreds of trees.
+
+### Key Properties
+
+- Trees are shallow (often 3–8 levels) and additive.
+- Uses the same impurity measures (Gini, entropy) to build each tree.
+- Highly flexible: can model complex, nonlinear relationships without manually designing interactions.
+
+---
+
+## Random Forests
+
+![Random Forest Illustration](imgs/RF.png)
+
+Random forests build an ensemble in a different way: instead of sequentially fixing mistakes, they train **many independent decision trees** on random subsets of the data and features, then average their predictions.
+
+### Steps
+
+1. Draw a bootstrap sample (random sample with replacement) from the dataset for each tree.
+2. At each split in a tree, consider only a random subset of features.
+3. Build each tree to full depth (or until a stopping criterion).
+4. For classification, predict the **majority vote** across all trees; for regression, predict the average.
+
+Intuition: each tree is a weak, high-variance model, but combining them **reduces variance dramatically**. Random subsets of data and features ensure that the trees are decorrelated, so their errors tend to cancel.
+
+### Advantages
+
+- Better with large feature sets efficiently.
+- More robust to noise and overfitting.
+- Easy to interpret feature importance.
+- Perfect for multiclass classification.
+
+---
+
 ## Support Vector Machines
 
 ---
