@@ -66,6 +66,8 @@ We continue this descent until one of the convergence criteria is met.
 
 ## Decision Trees
 
+<br>
+
 ![Decision Tree Illustration](imgs/DT.png)
 
 Decision trees are to logistic regression what neural networks are to linear regression. They are a more complex and capture non-linear relationships between features and labels. However, instead of gradient descent, we use a greedy search algorithm, and instead of minimizing a loss function, we maximize *information gain*.
@@ -222,6 +224,12 @@ Instead of building a single, deep tree, we build many small trees one after ano
 
     (Note that the 0 is not exponentiation but the iteration index.)
 
+    At this point in the iteration, we just have a tree with a single leaf.
+
+    Note: if we are classifying, then there is no clear 'average', we instead use the log-odds of the positive class proportion, $\log\left(\frac{p}{1-p}\right)$.
+
+    So, in other words, when we're predicting some continuous value, we always guess the mean, and when we're classifying, we always predict that the input has $log\left(\frac{p}{1-p}\right)$ chance of being in the positive class.
+
 2. **Compute the residuals** (prediction vs. ground truth for every sample).
 
     The residual for each sample can be calculated as:
@@ -234,7 +242,7 @@ Instead of building a single, deep tree, we build many small trees one after ano
 
     This calculation is done for every sample. Notice that we don't square or take the absolute value of the errors, instead we want to keep track of how much each prediction strayed from the truth.
 
-3. Train a new tree to predict *these* residuals. We train on the residuals in order to understand what we're doing wrong in the current ensemble of trees and move in the opposite direction.
+3. Train a new tree to predict *these* residuals. We train on the residuals in order to understand what we're doing wrong in the current ensemble (group) of trees and move in the opposite direction.
 
 4. Add this tree’s predictions to the previous ones, scaled by a learning rate (\eta):
 
@@ -251,43 +259,53 @@ Instead of building a single, deep tree, we build many small trees one after ano
     = y^{(\text{old})}_j + \eta \cdot r^{(j)}
    $$
 
+   Note that the new indices of $y$ and $\hat{y}$ don't indicate an *updated prediction* by the same tree, but rather the set of predictions by the new, updated tree (the latest in the ensemble).
+
 5. Recurse steps 2 to 4 until convergence.
 
 Each tree will only focus on the mistakes of the ensemble so far. We adjust in the direction of the negative gradient and scale that adjustment by the learning rate, that way we "converge slower" to create a more complex tree without overfitting. This process gradually improves the model. The small size of each tree and the learning rate prevent overfitting, even when we build hundreds of trees.
 
 ### How to do step 3
 
+At step 3, we have our input features as well as a 'residual' value for each sample. Here, we're working with continuous values (doing regression) since we're predicting residuals. Once again, we use a greedy algorithm to build a decision tree.
 
+For example, if using the Gain Ratio + C4.5 method, we would:
+
+1. Find all possible splits to split on for each feature.
+
+2. Find the split that minimizes the variance of the residuals in each child node. (Since we're doing regression now, we want to minimize variance instead of entropy.)
+3. Create child nodes and recurse until a stopping criterion is met.
 
 ### Key Properties
 
 - Trees are shallow (often 3–8 levels) and additive.
 - The same impurity measures (Gini, entropy) to build each tree.
+- Trees are invariant to monotonic transformations (don't need normalization).
 - We can now use trees to model more complex, non-linear data.
+- Work well with smaller datasets.
 
 ---
 
 ## Random Forests
 
-![Random Forest Illustration](imgs/RF.png)
+![A Beautiful Drawing of an Abstract Random Forest](imgs/RF.png)
+
+Building random forests is simpler than gradient boosting, but more complicated than basic decision trees. The main idea is, we have some data with some set of features. Then, we consider random subsets of these features a given of times and use a greedy build a decision tree for each. This creates an ensemble, which we use to make predictions.
 
 Random forests build an ensemble in a different way: instead of sequentially fixing mistakes, they train **many independent decision trees** on random subsets of the data and features, then average their predictions.
 
 ### Steps
 
-1. Draw a bootstrap sample (random sample with replacement) from the dataset for each tree.
-2. At each split in a tree, consider only a random subset of features.
-3. Build each tree to full depth (or until a stopping criterion).
-4. For classification, predict the **majority vote** across all trees; for regression, predict the average.
+1. Start with the full dataset $S$.
+2. If creating an $m$-tree ensemble with $n$ features each, trained on $k$ samples, repeat the following $m$ times:
+   1. Take the dataset $S$ and randomly pick $n$ features that it will consider.
+   2. Randomly take $k$ samples with replacement.
+   3. Use a greedy algorithm to build a decision tree on this subset.
+3. Now, you have $m$ "$k$ by $n$" decision trees.
 
-Intuition: each tree is a weak, high-variance model, but combining them **reduces variance dramatically**. Random subsets of data and features ensure that the trees are decorrelated, so their errors tend to cancel.
+When using this ensemble, we pass the input features to each of the $m$ trees, collect their predictions, and then average them (for regression) or take a plurality vote (for classification) to get the final output.
 
-### Advantages
-
-- Better with large feature sets efficiently.
-- More robust to noise and overfitting.
-- Easy to interpret feature importance.
-- Perfect for multiclass classification.
+Each tree is a weak, high-variance model, but combining them reduces variance by a lot. Random subsets of data and features ensure that the trees are decorrelated, so their errors tend to cancel out.
 
 ---
 
