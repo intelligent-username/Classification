@@ -194,12 +194,12 @@ $$
 
 ### Making Predictions
 
-Once we choose an impurity measure and run the corresponding greedy algorithm, we can make predictions by traversing the tree from the root to a leaf node based on the feature values of the input data point. The label associated with the leaf becomes our predicted label.
+Once we choose an impurity measure and run the greedy algorithm, an input is labelled by looking at its features and using them to traverse down the tree from root to leaf. Once we reach a leaf, we assign the most common class that is found within that leaf to our input point.
 
 ### Limitations
 
 - Can overfit
-- Use greedy algorithms, meaning they may sacrifice global optimality for instant gratification. As a result, they also can't be optimized directly, pruned, or regularized.
+- Greedy algorithms often sacrifice global optimality for instant gratification.
 - Too flat: can't model complex curves
 
 To solve these issues, we can use gradient boosting and random forests. But notice that, already, we're no longer limited to binary decisions.
@@ -208,33 +208,62 @@ To solve these issues, we can use gradient boosting and random forests. But noti
 
 ## Gradient-Boosted Trees
 
-![Gradient Boosting Illustration](imgs/GBT.png)
+![Gradient Boosting](imgs/GBT.png)
 
-Gradient-boosted trees take the basic decision tree idea and turn it into a **sequence of weak learners** that correct each other’s mistakes. Instead of building a single, deep tree, we build many small trees one after another. Each new tree looks at where the previous trees predicted incorrectly and tries to reduce that error.
+Gradient-boosted trees take the basic decision tree idea and turn it into a **sequence of weak learners** that correct each other’s mistakes. Using them is like performing gradient descent on decision trees, with which we continue itereating until the model converges.
+
+Instead of building a single, deep tree, we build many small trees one after another. Each new tree looks at where the previous trees predicted incorrectly and tries to reduce that error.
 
 ### Process
 
-1. Start with a single, simple tree that predicts all outputs roughly.
+1. **Start** with a single tree that predicts all outputs roughly. Often, this just means taking the mean of the target's values and making that the initial prediction.
 
-2. Compute the residuals—the difference between predicted values and the true labels.
+    The prediction can be written as $\hat{y}^{(0)} = \frac{1}{N} \sum_{i=1}^{N} y_i$
 
-3. Train a new tree to predict these residuals.
+    (Note that the 0 is not exponentiation but the iteration index.)
 
-4. Add this tree’s predictions to the previous ones, usually scaled by a learning rate (\eta):
+2. **Compute the residuals** (prediction vs. ground truth for every sample).
+
+    The residual for each sample can be calculated as:
+
+    $$
+    r^{(j)} = y^{(j)} - \hat{y}^{(j)}
+    $$
+
+    (Where $j$ is the current iteration of the boosting process and $y$ is the true label.)
+
+    This calculation is done for every sample. Notice that we don't square or take the absolute value of the errors, instead we want to keep track of how much each prediction strayed from the truth.
+
+3. Train a new tree to predict *these* residuals. We train on the residuals in order to understand what we're doing wrong in the current ensemble of trees and move in the opposite direction.
+
+4. Add this tree’s predictions to the previous ones, scaled by a learning rate (\eta):
 
    $$
-   \hat{y}*{new} = \hat{y}*{old} + \eta \cdot \text{tree output}
+   \hat{y}^{(j+1)} = \hat{y}^{(j)} + \eta \cdot \text{tree's output}
    $$
 
-5. Repeat steps 2–4 for a fixed number of trees or until residuals are small enough.
+   You can think of this as performing gradient descent on the predictions, where we have:
 
-Intuition: each tree **focuses only on the mistakes of the ensemble so far**, gradually improving the model. The small size of each tree and the learning rate prevent overfitting, even when we build hundreds of trees.
+   $$
+    y^{(\text{new})}_j = y^{(\text{old})}_j - \eta \cdot \frac{\partial L}{\partial y_j} \\
+    = y^{(\text{old})}_j - \eta (\hat{y}^{(j)} - y^{(j)}) \\
+    = y^{(\text{old})}_j - \eta \cdot (-r^{(j)}) \\
+    = y^{(\text{old})}_j + \eta \cdot r^{(j)}
+   $$
+
+5. Recurse steps 2 to 4 until convergence.
+
+Each tree will only focus on the mistakes of the ensemble so far. We adjust in the direction of the negative gradient and scale that adjustment by the learning rate, that way we "converge slower" to create a more complex tree without overfitting. This process gradually improves the model. The small size of each tree and the learning rate prevent overfitting, even when we build hundreds of trees.
+
+### How to do step 3
+
+
 
 ### Key Properties
 
 - Trees are shallow (often 3–8 levels) and additive.
-- Uses the same impurity measures (Gini, entropy) to build each tree.
-- Highly flexible: can model complex, nonlinear relationships without manually designing interactions.
+- The same impurity measures (Gini, entropy) to build each tree.
+- We can now use trees to model more complex, non-linear data.
 
 ---
 
