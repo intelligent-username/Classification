@@ -66,8 +66,6 @@ We continue this descent until one of the convergence criteria is met.
 
 ## Decision Trees
 
-<br>
-
 ![Decision Tree Illustration](imgs/DT.png)
 
 Decision trees are to logistic regression what neural networks are to linear regression. They are a more complex and capture non-linear relationships between features and labels. However, instead of gradient descent, we use a greedy search algorithm, and instead of minimizing a loss function, we maximize *information gain*.
@@ -311,9 +309,20 @@ Each tree is a weak, high-variance model, but combining them reduces variance by
 
 ## Support Vector Machines
 
+![SVM Illustration](imgs/SVM.png)
+
+When working with a support vector machine (SVM), we try to find the best way to separate our classes. This means forming a line, 2D plane, or etc. to model a boundary. The hyperplane is formed through two **support vectors**. The best hyperplane is the one that maximizes the margin between the two classes. The margin is defined as the distance between the hyperplane and the closest points from each class, which are called support vectors.
+
+### Process
+
+### Applications
+
 ---
 
 ## Multi-Class Classification
+
+![Multi-Class Classification Illustration](imgs/MCC.png)
+
 
 ---
 
