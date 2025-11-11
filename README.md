@@ -307,26 +307,166 @@ Each tree is a weak, high-variance model, but combining them reduces variance by
 
 ---
 
-## Support Vector Machines
+## Support Vector Machine
 
 ![SVM Illustration](imgs/SVM.png)
 
 When working with a support vector machine (SVM), we try to find the best way to separate our classes. This means forming a line, 2D plane, or etc. to model a boundary. The hyperplane is formed through two **support vectors**. The best hyperplane is the one that maximizes the margin between the two classes. The margin is defined as the distance between the hyperplane and the closest points from each class, which are called support vectors.
 
-### Process
+To use an SVM, we simply plot the unlabeled data point and see which side of the hyperplane it's on. But first, we need to understand how the more basic versions of it work.
 
-### Applications
+### Terminology
+
+- In $\mathbb{R}^n$, a **hyperplane** is a $\mathbb{R}^{n-1}$ flat affine space. It can be written as:
+
+$$
+\beta_0 + \beta_1 x_2 + ... + \beta_n X_n = 0
+$$
+
+&nbsp; (Any point $X$ with coordinates $(X_1, X_2, ...\,, X_n)^T$ lies on the plane if it's components satisfy the above equation. Points that don't satisfy this equation lie on either "one side or the other" of the hyperplane. More on this later). For example, in $\mathbb{R}^2$, a hyperplane is just a line, and in $\mathbb{R}^3$, it's a 2D plane.
+
+- The **margin** is the perpendicular distance between the hyperplane and the closest points from each class (the *support vectors*).
+
+- $\text{exp(x)}$ is $e^{x}$
+
+### Maximal margin Classifier
+
+In general, when working with hyperplanes that correctly classify two classes, we can draw infinitely many hyperplanes that separate them. The Maximal Margin Classifier is the hyperplane that *maximizes* the margin between the two classes while still classifying all of the data points correctly.
+
+Formally, if we have a set of parameters ${\Beta_1, ..., \Beta_n}$, where each parameter is a set composed of weights $\beta_1, ... , \beta_n$, the maximal margin classifier solves the following optimization problem:
+
+$$
+\Beta_{min} = \min_{\Beta_i}(S), \text{where} \\
+S =  \{\frac{1}{2} ||{\Beta_i}|| ^2 : \Beta_i \in \Beta \}
+$$
+
+(note that we take min instead of the max since the margin, $\gamma$, is defined as $\frac{1}{||\Beta||}$).
+
+In other words, we try to reduce both bias and variance at the same time, which creates a nice, generalizable model.
+
+### Support Vector Classifier
+
+If there are no hyperplanes that can perfectly separate the two classes (or even if there are and we want to improve robustness), we need to further generalize the margin classifiers to fit our data.
+
+A support vector classifier uses softer margins in order to allow for some misclassification. This introduces "slack variables" $\xi_i \ge 0$ to allow us more flexibility when fitting the hyperplane.:
+
+$$
+y_i (w \cdot x_i + b) \ge 1 - \xi_i, \quad \forall i
+$$
+
+and minimizes
+
+$$
+\frac{1}{2} \| \Beta \|^2 + C \sum_i \xi_i
+$$
+
+where $C$ controls the trade-off between margin size and misclassification penalty.
+
+Think of $\text{C}$ as our "variance budget", where, the higher our $\text{C}$, the more variance we're willing to accept in order to reduce bias (by fitting the training data better). Conversely, a lower $\text{C}$ means we're prioritizing a larger margin (lower variance) at the cost of some misclassifications (higher bias).
+
+So, $\text{C}$ is now a regularization hyperparameter that we can tune to find the best balance for our specific dataset.
+
+### Support Vector Machines
+
+Now, imagine even that's not enough. What if the data is completely linearly inseparable? As in, what if some of the points fully surround other points of a different class?
+
+In that case, the job is a lot harder. We can try to map the data onto a higher dimensional space so that it *is* separable.
+
+To do this, we need some function, call it $\phi(x)$, that maps our data from $\mathbb{R}^n$ to $\mathbb{R}^m$, where $m > n$. Then, we can try to find a hyperplane in this new space.
+
+For example, if we have two-dimensional points that are not linearly separable, we can map them to three dimensions using:
+
+$$
+\phi(x_1, x_2) = (x_1, x_2, x_1^2x_2^2)
+$$
+
+Now, to to find the optimal hyperplane in this new space, we can use the same techniques as before (maximal margin classifier or support vector classifier).
+
+I.e. we want to find $\Beta$ such that:
+
+$$
+\Beta_{min} = \min_{\Beta} \frac{1}{2} ||\Beta||^2
+$$
+
+subject to the constraints
+
+$$
+y_i (\Beta \cdot \phi(x_i) + b) \ge 1, \quad \forall i
+$$
+
+where, $y_i \in \{-1, +1\}$, and the support vectors are the points for which the inequality is tight ($y_i (\Beta \cdot \phi(x_i) + b) = 1$). This is the same maximal margin optimization as in the original 2D space, just applied in the transformed 3D space.
+
+### Kernel Trick
+
+If we have a high-dimensional space and many points, these calculations can get very expensive. However, we can use a trick called the kernel trick to avoid explicitly computing the mapping $\phi(x)$.
+
+The kernel trick allows us to compute the inner products in the high-dimensional space without explicitly mapping the points. We define a kernel function $K(x_i, x_j)$ that computes the inner product of the mapped points:
+
+$$
+K(x_i, x_j) = \phi(x_i) \cdot \phi(x_j)
+$$
+
+Common kernel functions include:
+
+- **Linear Kernel**: $K(x_i, x_j) = x_i \cdot x_j$
+- **Polynomial Kernel**: $K(x_i, x_j) = (x_i \cdot x_j + 1)^d$
+- **Radial Basis Function (RBF) Kernel**: $K(x_i, x_j) = \exp(-\gamma ||x_i - x_j||^2)$
 
 ---
 
-## Multi-Class Classification
+## Multiclass Classification
 
 ![Multi-Class Classification Illustration](imgs/MCC.png)
 
+Multiclass classification is the extension of binary classification to handle **more than two classes**. Instead of simply predicting a yes/no label, we want to assign each input to one of $K > 2$ categories.
+
+### Strategies for Multiclass SVMs
+
+SVMs are inherently binary, but we can adapt them using one of two common strategies:
+
+1. **One-vs-Rest (OvR) / One-vs-All (OvA)**  
+   - Train $K$ separate binary classifiers, each distinguishing one class from all others.  
+   - For class $k$, label all examples in class $k$ as $+1$ and all others as $-1$.  
+   - At prediction time, compute the decision function for all $K$ classifiers and pick the class with the **highest margin** (i.e., the classifier most confident in a positive prediction).
+
+2. **One-vs-One (OvO)**  
+   - Train a binary classifier for **every pair of classes**, resulting in $K(K-1)/2$ classifiers.  
+   - Each classifier distinguishes between two classes, ignoring the rest.  
+   - At prediction, each classifier votes for one of its two classes. The class with the **most votes** is chosen as the prediction.
+
+### Multiclass Logistic Regression
+
+For logistic regression, multiclass prediction is typically handled using **softmax regression**:
+
+$$
+P(y=k \mid x) = \frac{\exp(w_k \cdot x)}{\sum_{j=1}^{K} \exp(w_j \cdot x)}
+$$
+
+- $w_k$ is the weight vector for class $k$.  
+- The denominator ensures that the predicted probabilities sum to 1 over all classes.  
+- The predicted class is:
+
+$$
+\hat{y} = \arg\max_{k} P(y=k \mid x)
+$$
+
+The loss function becomes **categorical cross-entropy**:
+
+$$
+L = -\sum_{i=1}^{N} \sum_{k=1}^{K} y_{ik} \log P(y_i=k \mid x_i)
+$$
+
+where $y_{ik}$ is 1 if sample $i$ belongs to class $k$, 0 otherwise.
+
+### Decision Trees and Ensembles
+
+Decision trees, random forests, and gradient-boosted trees naturally handle multiple classes without modification. Each leaf simply stores the most frequent class among the training samples that reach it. During prediction, the path from root to leaf determines the predicted class.
 
 ---
 
 ## k-Nearest Neighbours
+
+![k-NN Illustration](imgs/kNN.png)
 
 It would be a shame to talk about classification methods without at least mentioning k-nearest neighbours. It's not very closely related to any of the other methods we've discussed, but it's so effective that one cannot ignore it.
 
