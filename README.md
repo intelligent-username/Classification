@@ -4,6 +4,18 @@
 
 In classification, we have some information and we want to *label* it as part of some discrete class.
 
+## Outline
+
+- [Introduction](#introduction)
+- [Logistic Regression](#logistic-regression)
+- [Decision Trees](#decision-trees)
+- [Gradient-Boosted Trees](#gradient-boosted-trees)
+- [Random Forests](#random-forests)
+- [Support Vector Machine](#support-vector-machine)
+- [Multiclass Classification](#multiclass-classification)
+- [k-Nearest Neighbours](#k-nearest-neighbours)
+- [Installation & Setup](#installation--setup)
+
 ## Introduction
 
 Classification is sometimes called categorical regression (or logistic regression, if we're only categorizing between binary values), but it's not *really* regression. Regression refers to predicting continuous values. There's also no closed-form solution. To build intuition, we can think of classification tasks as regression with a transformed floor or ceiling function applied to the continuous prediction.
@@ -474,7 +486,11 @@ When using k-NN, we take a point's features and look around at the k closest poi
 
 ---
 
-## Setup
+## Installation & Setup
+
+- Clone this repo
+- Download dependencies
+- Run it
 
 ---
 
