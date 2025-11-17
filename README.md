@@ -128,17 +128,17 @@ $$
 H_{new} = \sum_{j=1}^{M} \frac{|S_j|}{|S|} H(S_j)
 $$
 
-    ($M$ is the number of splits, $S_j$ is the set of samples in split $j$, and $|S|$ is the total number of samples at the current node)
+$M$ is the number of splits, $S_j$ is the set of samples in split $j$, and $|S|$ is the total number of samples at the current node
 
 4. Choose the split that results in the highest information gain (i.e., with the lowest entropy):
 
 $$
-    \text{IG} := \text{Information Gain} = H(S) - H_{j}
+\text{IG} := \text{Information Gain} = H(S) - H_{j}
 $$
     (where $j$ is each possible split (at a given depth) and $\text{IG}$ is the list of information gains.)
 
 $$
-    \text{NS} := \text{NewSplit} = \max \text{IG}
+\text{NS} := \text{NewSplit} = \max \text{IG}
 $$
 
 5. Now, each split will create child nodes. Recurse by making each child node the new root and repeating steps 1-5 until it's time to stop.
@@ -253,9 +253,9 @@ $$
 r^{(j)} = y^{(j)} - \hat{y}^{(j)}
 $$
 
-    (Where $j$ is the current iteration of the boosting process and $y$ is the true label.)
+Where $j$ is the current iteration of the boosting process and $y$ is the true label.
 
-    This calculation is done for every sample. Notice that we don't square or take the absolute value of the errors, instead we want to keep track of how much each prediction strayed from the truth.
+This calculation is done for every sample. Notice that we don't square or take the absolute value of the errors, instead we want to keep track of how much each prediction strayed from the truth.
 
 3. Train a new tree to predict *these* residuals. We train on the residuals in order to understand what we're doing wrong in the current ensemble (group) of trees and move in the opposite direction.
 
