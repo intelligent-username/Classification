@@ -135,7 +135,8 @@ $M$ is the number of splits, $S_j$ is the set of samples in split $j$, and $|S|$
 $$
 \text{IG} := \text{Information Gain} = H(S) - H_{j}
 $$
-    (where $j$ is each possible split (at a given depth) and $\text{IG}$ is the list of information gains.)
+
+Where $j$ is each possible split (at a given depth) and $\text{IG}$ is the list of information gains.
 
 $$
 \text{NS} := \text{NewSplit} = \max \text{IG}
