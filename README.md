@@ -70,7 +70,11 @@ $$
 w_{j+1} = w_j - \eta \left.\frac{\partial L}{\partial w}\right|_{w = w_j}
 $$
 
-As a reminder, our $L$ is the negative log-likelihood function, $N$ is the number of samples, $y_i$ is the true label for sample $i$, $\hat{y}_i$ is the predicted probability for sample $i$, and $x_{ij}$ is the value of feature $j$ for sample $i$.
+As a reminder:
+- $L$ is the negative log-likelihood function
+- $N$ is the number of samples, $y_i$ is the true label for sample $i$
+- $\hat{y}_i$ is the predicted probability for sample $i$
+- $x_{ij}$ is the value of feature $j$ for sample $i$.
 
 We continue this descent until one of the convergence criteria is met.
 
@@ -120,21 +124,22 @@ To do this, we use the concept of *information gain*. Information gain is how mu
 2. Look at all the candidate features and split the dataset on each feature.
 3. For each split, calculate the *new* expected entropy, using the same formula as step 1, this time finding the weighted average:
 
-    $$
-    H_{new} = \sum_{j=1}^{M} \frac{|S_j|}{|S|} H(S_j)
-    $$
+$$
+H_{new} = \sum_{j=1}^{M} \frac{|S_j|}{|S|} H(S_j)
+$$
 
     ($M$ is the number of splits, $S_j$ is the set of samples in split $j$, and $|S|$ is the total number of samples at the current node)
 
 4. Choose the split that results in the highest information gain (i.e., with the lowest entropy):
 
-    $$
-        \text{IG} := \text{Information Gain} = H(S) - H_{j}
-    $$
+$$
+    \text{IG} := \text{Information Gain} = H(S) - H_{j}
+$$
     (where $j$ is each possible split (at a given depth) and $\text{IG}$ is the list of information gains.)
-    $$
-        \text{NS} := \text{NewSplit} = \max \text{IG}
-    $$
+
+$$
+    \text{NS} := \text{NewSplit} = \max \text{IG}
+$$
 
 5. Now, each split will create child nodes. Recurse by making each child node the new root and repeating steps 1-5 until it's time to stop.
 
@@ -244,9 +249,9 @@ Instead of building a single, deep tree, we build many small trees one after ano
 
     The residual for each sample can be calculated as:
 
-    $$
-    r^{(j)} = y^{(j)} - \hat{y}^{(j)}
-    $$
+$$
+r^{(j)} = y^{(j)} - \hat{y}^{(j)}
+$$
 
     (Where $j$ is the current iteration of the boosting process and $y$ is the true label.)
 
@@ -256,18 +261,18 @@ Instead of building a single, deep tree, we build many small trees one after ano
 
 4. Add this tree’s predictions to the previous ones, scaled by a learning rate (\eta):
 
-   $$
-   \hat{y}^{(j+1)} = \hat{y}^{(j)} + \eta \cdot \text{tree's output}
-   $$
+$$
+\hat{y}^{(j+1)} = \hat{y}^{(j)} + \eta \cdot \text{tree's output}
+$$
 
    You can think of this as performing gradient descent on the predictions, where we have:
 
-   $$
-    y^{(\text{new})}_j = y^{(\text{old})}_j - \eta \cdot \frac{\partial L}{\partial y_j} \\
-    = y^{(\text{old})}_j - \eta (\hat{y}^{(j)} - y^{(j)}) \\
-    = y^{(\text{old})}_j - \eta \cdot (-r^{(j)}) \\
-    = y^{(\text{old})}_j + \eta \cdot r^{(j)}
-   $$
+$$
+y^{(\text{new})}_j = y^{(\text{old})}_j - \eta \cdot \frac{\partial L}{\partial y_j} \\
+= y^{(\text{old})}_j - \eta (\hat{y}^{(j)} - y^{(j)}) \\
+= y^{(\text{old})}_j - \eta \cdot (-r^{(j)}) \\
+= y^{(\text{old})}_j + \eta \cdot r^{(j)}
+$$
 
    Note that the new indices of $y$ and $\hat{y}$ don't indicate an *updated prediction* by the same tree, but rather the set of predictions by the new, updated tree (the latest in the ensemble).
 
@@ -311,7 +316,7 @@ Random forests build an ensemble in a different way: instead of sequentially fix
    1. Take the dataset $S$ and randomly pick $n$ features that it will consider.
    2. Randomly take $k$ samples with replacement.
    3. Use a greedy algorithm to build a decision tree on this subset.
-3. Now, you have $m$ "$k$ by $n$" decision trees.
+3. Now, you have $m$ k by n decision trees.
 
 When using this ensemble, we pass the input features to each of the $m$ trees, collect their predictions, and then average them (for regression) or take a plurality vote (for classification) to get the final output.
 
