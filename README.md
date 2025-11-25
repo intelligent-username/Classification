@@ -22,8 +22,6 @@ Classification is sometimes called categorical regression (or logistic regressio
 
 There are many different branches of classification. In this writeup, we'll cover some of the most important ones.
 
----
-
 ## Logistic Regression
 
 Logistic regression is the simplest and most important form of classification to understand. It is a special case of classification that only has binary outputs. When performing logistic regression, we aim to find the best-fitting model to describe the relationship between the binary outcome and the predictor variables.
@@ -46,7 +44,7 @@ $$
 
 which will give us an output between 0 and 1. We interpret this as the probability that the input belongs to the *positive* class (label 1). Then, we set some threshold for our predictions. For example, only if something has a 70% chance of being spam do we actually classify it as spam.
 
-![Sigmoid Function](imgs/sigmoid.png)
+<img src="imgs/sigmoid.png" style="background-color: white;" alt="Sigmoid Function" />
 
 ### Negative Log-Likelihood
 
@@ -78,7 +76,6 @@ As a reminder:
 
 We continue this descent until one of the convergence criteria is met.
 
----
 
 ## Decision Trees
 
@@ -222,8 +219,6 @@ Once we choose an impurity measure and run the greedy algorithm, an input is lab
 
 To solve these issues, we can use gradient boosting and random forests. But notice that, already, we're no longer limited to binary decisions.
 
----
-
 ## Gradient-Boosted Trees
 
 ![Gradient Boosting](imgs/GBT.png)
@@ -300,8 +295,6 @@ For example, if using the Gain Ratio + C4.5 method, we would:
 - We can now use trees to model more complex, non-linear data.
 - Work well with smaller datasets.
 
----
-
 ## Random Forests
 
 ![A Beautiful Drawing of an Abstract Random Forest](imgs/RF.png)
@@ -322,8 +315,6 @@ Random forests build an ensemble in a different way: instead of sequentially fix
 When using this ensemble, we pass the input features to each of the $m$ trees, collect their predictions, and then average them (for regression) or take a plurality vote (for classification) to get the final output.
 
 Each tree is a weak, high-variance model, but combining them reduces variance by a lot. Random subsets of data and features ensure that the trees are decorrelated, so their errors tend to cancel out.
-
----
 
 ## Support Vector Machine
 
@@ -351,10 +342,10 @@ $$
 
 In general, when working with hyperplanes that correctly classify two classes, we can draw infinitely many hyperplanes that separate them. The Maximal Margin Classifier is the hyperplane that *maximizes* the margin between the two classes while still classifying all of the data points correctly.
 
-Formally, if we have a set of parameters ${\beta_1, ..., \beta_n}$, where each parameter is a set composed of weights $\beta_1, ... , \beta_n$, the maximal margin classifier solves the following optimization problem:
+In mathematical form, if we have a set of parameters ${\beta_1, ..., \beta_n}$, where each parameter is a set composed of weights $\beta_1, ... , \beta_n$, the maximal margin classifier solves the following optimization problem:
 
 $$
-\Beta_{min} = \min_{\beta_i}(S), \text{where} \\
+\beta_{min} = \min_{\beta_i}(S), \text{where} \\
 S =  \{\frac{1}{2} ||{\beta_i}|| ^2 : \beta_i \in \beta \}
 $$
 
@@ -430,7 +421,7 @@ Common kernel functions include:
 - **Polynomial Kernel**: $K(x_i, x_j) = (x_i \cdot x_j + 1)^d$
 - **Radial Basis Function (RBF) Kernel**: $K(x_i, x_j) = \exp(-\gamma ||x_i - x_j||^2)$
 
----
+
 
 ## Multiclass Classification
 
@@ -480,8 +471,6 @@ where $y_{ik}$ is 1 if sample $i$ belongs to class $k$, 0 otherwise.
 
 Decision trees, random forests, and gradient-boosted trees naturally handle multiple classes without modification. Each leaf simply stores the most frequent class among the training samples that reach it. During prediction, the path from root to leaf determines the predicted class.
 
----
-
 ## k-Nearest Neighbours
 
 ![k-NN Illustration](imgs/kNN.png)
@@ -489,8 +478,6 @@ Decision trees, random forests, and gradient-boosted trees naturally handle mult
 It would be a shame to talk about classification methods without at least mentioning k-nearest neighbours. It's not very closely related to any of the other methods we've discussed, but it's so effective that one cannot ignore it.
 
 When using k-NN, we take a point's features and look around at the k closest points in our training data. We then take a majority vote of those k points' labels to determine the label of our input point. it is a very simple algorithm, but it often works very well. Also, k-NN gives us an early and simplistic preview into unsupervised learning.
-
----
 
 ## Project Structure
 
@@ -513,8 +500,6 @@ Classification/
     ├── MCC.png
     └── kNN.png
 ```
-
----
 
 ## Installation & Setup
 
