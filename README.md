@@ -260,7 +260,7 @@ This calculation is done for every sample. Notice that we don't square or take t
 
 3. Train a new tree to predict *these* residuals. We train on the residuals in order to understand what we're doing wrong in the current ensemble (group) of trees and move in the opposite direction.
 
-4. Add this tree’s predictions to the previous ones, scaled by a learning rate (\eta):
+4. Add this tree’s predictions to the previous ones, scaled by a learning rate $\eta$:
 
 $$
 \hat{y}^{(j+1)} = \hat{y}^{(j)} + \eta \cdot \text{tree's output}
@@ -351,14 +351,14 @@ $$
 
 In general, when working with hyperplanes that correctly classify two classes, we can draw infinitely many hyperplanes that separate them. The Maximal Margin Classifier is the hyperplane that *maximizes* the margin between the two classes while still classifying all of the data points correctly.
 
-Formally, if we have a set of parameters ${\Beta_1, ..., \Beta_n}$, where each parameter is a set composed of weights $\beta_1, ... , \beta_n$, the maximal margin classifier solves the following optimization problem:
+Formally, if we have a set of parameters ${\beta_1, ..., \beta_n}$, where each parameter is a set composed of weights $\beta_1, ... , \beta_n$, the maximal margin classifier solves the following optimization problem:
 
 $$
-\Beta_{min} = \min_{\Beta_i}(S), \text{where} \\
-S =  \{\frac{1}{2} ||{\Beta_i}|| ^2 : \Beta_i \in \Beta \}
+\Beta_{min} = \min_{\beta_i}(S), \text{where} \\
+S =  \{\frac{1}{2} ||{\beta_i}|| ^2 : \beta_i \in \beta \}
 $$
 
-(note that we take min instead of the max since the margin, $\gamma$, is defined as $\frac{1}{||\Beta||}$).
+(note that we take min instead of the max since the margin, $\gamma$, is defined as $\frac{1}{||\beta||}$).
 
 In other words, we try to reduce both bias and variance at the same time, which creates a nice, generalizable model.
 
@@ -375,7 +375,7 @@ $$
 and minimizes
 
 $$
-\frac{1}{2} \| \Beta \|^2 + C \sum_i \xi_i
+\frac{1}{2} \| \beta \|^2 + C \sum_i \xi_i
 $$
 
 where $C$ controls the trade-off between margin size and misclassification penalty.
@@ -400,19 +400,19 @@ $$
 
 Now, to to find the optimal hyperplane in this new space, we can use the same techniques as before (maximal margin classifier or support vector classifier).
 
-I.e. we want to find $\Beta$ such that:
+I.e. we want to find $\beta$ such that:
 
 $$
-\Beta_{min} = \min_{\Beta} \frac{1}{2} ||\Beta||^2
+\beta_{min} = \min_{\beta} \frac{1}{2} ||\beta||^2
 $$
 
 subject to the constraints
 
 $$
-y_i (\Beta \cdot \phi(x_i) + b) \ge 1, \quad \forall i
+y_i (\beta \cdot \phi(x_i) + b) \ge 1, \quad \forall i
 $$
 
-where, $y_i \in \{-1, +1\}$, and the support vectors are the points for which the inequality is tight ($y_i (\Beta \cdot \phi(x_i) + b) = 1$). This is the same maximal margin optimization as in the original 2D space, just applied in the transformed 3D space.
+where, $y_i \in \{-1, +1\}$, and the support vectors are the points for which the inequality is tight ($y_i (\beta \cdot \phi(x_i) + b) = 1$). This is the same maximal margin optimization as in the original 2D space, just applied in the transformed 3D space.
 
 ### Kernel Trick
 
@@ -494,7 +494,7 @@ When using k-NN, we take a point's features and look around at the k closest poi
 
 ## Project Structure
 
-```
+```md
 Classification/
 ├── README.md
 ├── requirements.txt
