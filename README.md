@@ -492,12 +492,73 @@ When using k-NN, we take a point's features and look around at the k closest poi
 
 ---
 
-## Installation & Setup
+## Project Structure
 
-- Clone this repo
-- Download dependencies
-- Run it
+```
+Classification/
+├── README.md
+├── requirements.txt
+├── src/
+│   ├── __init__.py
+│   └── main.py
+├── tests/
+│   └── test_main.py
+└── imgs/
+    ├── cover.jpg
+    ├── sigmoid.png
+    ├── DT.png
+    ├── GBT.png
+    ├── RF.png
+    ├── SVM.png
+    ├── MCC.png
+    └── kNN.png
+```
 
 ---
+
+## Installation & Setup
+
+### Prerequisites
+
+- Python 3.8+
+- Git
+
+### Setup
+
+Clone this repo:
+
+```bash
+git clone https://github.com/intelligent-username/Classification
+cd Classification
+```
+
+Create a virtual environment (recommended):
+
+```bash
+python -m venv venv
+```
+
+Activate the virtual environment:
+
+- On Windows:
+  ```bash
+  venv\Scripts\activate
+  ```
+- On macOS/Linux:
+  ```bash
+  source venv/bin/activate
+  ```
+
+Install the required packages:
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the project:
+
+```bash
+python src/main.py
+```
 
 This project is licensed under the [MIT License](LICENSE).
