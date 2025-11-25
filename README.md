@@ -44,7 +44,7 @@ $$
 
 which will give us an output between 0 and 1. We interpret this as the probability that the input belongs to the *positive* class (label 1). Then, we set some threshold for our predictions. For example, only if something has a 70% chance of being spam do we actually classify it as spam.
 
-<img src="imgs/sigmoid.png" style="background-color: white;" alt="Sigmoid Function" />
+![Sigmoid Function](imgs/sigmoid.png)
 
 ### Negative Log-Likelihood
 
@@ -491,14 +491,6 @@ Classification/
 ├── tests/
 │   └── test_main.py
 └── imgs/
-    ├── cover.jpg
-    ├── sigmoid.png
-    ├── DT.png
-    ├── GBT.png
-    ├── RF.png
-    ├── SVM.png
-    ├── MCC.png
-    └── kNN.png
 ```
 
 ## Installation & Setup
