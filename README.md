@@ -483,14 +483,9 @@ When using k-NN, we take a point's features and look around at the k closest poi
 
 ```md
 Classification/
-├── README.md
-├── requirements.txt
-├── src/
-│   ├── __init__.py
-│   └── main.py
-├── tests/
-│   └── test_main.py
 └── imgs/
+├── README.md
+└── requirements.txt
 ```
 
 ## Installation & Setup
