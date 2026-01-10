@@ -8,19 +8,41 @@ In classification, we have some information and we want to *label* it as part of
 
 - [Introduction](#introduction)
 - [Logistic Regression](#logistic-regression)
+  - [Logistic Function (Sigmoid)](#logistic-function-sigmoid)
+  - [Negative Log-Likelihood](#negative-log-likelihood)
+  - [Gradient Descent](#gradient-descent)
+
 - [Decision Trees](#decision-trees)
+  - [Splitting Criteria](#splitting-criteria)
+  - [Entropy & ID3](#entropy--id3)
+  - [Gain Ratio & C4.5](#gain-ratio--c45)
+  - [Gini Impurity & CART](#gini-impurity--cart)
+  - [Making Predictions](#making-predictions)
+  - [Limitations](#limitations)
+
 - [Gradient-Boosted Trees](#gradient-boosted-trees)
+  - [Process](#process)
+  - [How to do step 3](#how-to-do-step-3)
+  - [Key Properties](#key-properties)
+
+- [XGBoost](#xgboost)
+
 - [Random Forests](#random-forests)
+
 - [Support Vector Machine](#support-vector-machine)
+
 - [Multiclass Classification](#multiclass-classification)
+  - [Strategies for Multiclass SVMs](#strategies-for-multiclass-svms)
+  - [Multiclass Logistic Regression](#multiclass-logistic-regression)
+  - [Decision Trees and Ensembles](#decision-trees-and-ensembles)
+
 - [k-Nearest Neighbours](#k-nearest-neighbours)
-- [Installation & Setup](#installation--setup)
 
 ## Introduction
 
-Classification is sometimes called categorical regression (or logistic regression, if we're only categorizing between binary values), but it's not *really* regression. Regression refers to predicting continuous values. There's also no closed-form solution. To build intuition, we can think of classification tasks as regression with a transformed floor or ceiling function applied to the continuous prediction.
+Classification is sometimes called categorical regression (or logistic regression, if we're only categorizing between binary values), but it's not *really* regression. Regression refers to predicting continuous values. Classification is more like "threshold prediction", i.e. performing classification is like performing regression and then applying a custom floor/ceiling function to the predicted values.
 
-There are many different branches of classification. In this writeup, we'll cover some of the most important ones.
+There are many different branches of classification. In this writeup, we'll cover the most important ones.
 
 ## Logistic Regression
 
@@ -42,7 +64,7 @@ $$
 \sigma(z) = \frac{1}{1 + e^{-z}}
 $$
 
-which will give us an output between 0 and 1. We interpret this as the probability that the input belongs to the *positive* class (label 1). Then, we set some threshold for our predictions. For example, only if something has a 70% chance of being spam do we actually classify it as spam.
+which will give us an output between 0 and 1. We interpret this as the probability that the input belongs to the *positive* class (label 1). Then, we set some threshold for our predictions. For example, we can say, "only if something has a chance of at least 70% of being spam will we classify it as spam".
 
 ![Sigmoid Function](imgs/sigmoid.png)
 
@@ -69,6 +91,7 @@ w_{j+1} = w_j - \eta \left.\frac{\partial L}{\partial w}\right|_{w = w_j}
 $$
 
 As a reminder:
+
 - $L$ is the negative log-likelihood function
 - $N$ is the number of samples, $y_i$ is the true label for sample $i$
 - $\hat{y}_i$ is the predicted probability for sample $i$
@@ -76,6 +99,7 @@ As a reminder:
 
 We continue this descent until one of the convergence criteria is met.
 
+So, in summation, when performing logistic regression, we initialize some set of weights $w$, add a sigmoid (activation) layer to the end of the model, and then use gradient descent to optimize the weights according to the negative log-likelihood loss function. The output of these weights is then pass into a "classifier", in this case the sigmoid function, which maps the output to a probability between 0 and 1. We can change the threshold for a 'positive' classification depending on the tradeoff we want to make between precision and recall.
 
 ## Decision Trees
 
@@ -121,23 +145,23 @@ To do this, we use the concept of *information gain*. Information gain is how mu
 2. Look at all the candidate features and split the dataset on each feature.
 3. For each split, calculate the *new* expected entropy, using the same formula as step 1, this time finding the weighted average:
 
-$$
-H_{new} = \sum_{j=1}^{M} \frac{|S_j|}{|S|} H(S_j)
-$$
+   $$
+   H_{new} = \sum_{j=1}^{M} \frac{|S_j|}{|S|} H(S_j)
+   $$
 
-$M$ is the number of splits, $S_j$ is the set of samples in split $j$, and $|S|$ is the total number of samples at the current node
+   $M$ is the number of splits, $S_j$ is the set of samples in split $j$, and $|S|$ is the total number of samples at the current node
 
 4. Choose the split that results in the highest information gain (i.e., with the lowest entropy):
 
-$$
-\text{IG} := \text{Information Gain} = H(S) - H_{j}
-$$
+   $$
+   \text{IG} := \text{Information Gain} = H(S) - H_{j}
+   $$
 
-Where $j$ is each possible split (at a given depth) and $\text{IG}$ is the list of information gains.
+   Where $j$ is each possible split (at a given depth) and $\text{IG}$ is the list of information gains.
 
-$$
-\text{NS} := \text{NewSplit} = \max \text{IG}
-$$
+   $$
+   \text{NS} := \text{NewSplit} = \max \text{IG}
+   $$
 
 5. Now, each split will create child nodes. Recurse by making each child node the new root and repeating steps 1-5 until it's time to stop.
 
@@ -245,32 +269,32 @@ Instead of building a single, deep tree, we build many small trees one after ano
 
     The residual for each sample can be calculated as:
 
-$$
-r^{(j)} = y^{(j)} - \hat{y}^{(j)}
-$$
+   $$
+   r^{(j)} = y^{(j)} - \hat{y}^{(j)}
+   $$
 
-Where $j$ is the current iteration of the boosting process and $y$ is the true label.
+   Where $j$ is the current iteration of the boosting process and $y$ is the true label.
 
-This calculation is done for every sample. Notice that we don't square or take the absolute value of the errors, instead we want to keep track of how much each prediction strayed from the truth.
+   This calculation is done for every sample. Notice that we don't square or take the absolute value of the errors, instead we want to keep track of how much each prediction strayed from the truth.
 
 3. Train a new tree to predict *these* residuals. We train on the residuals in order to understand what we're doing wrong in the current ensemble (group) of trees and move in the opposite direction.
 
 4. Add this tree’s predictions to the previous ones, scaled by a learning rate $\eta$:
 
-$$
-\hat{y}^{(j+1)} = \hat{y}^{(j)} + \eta \cdot \text{tree's output}
-$$
+   $$
+   \hat{y}^{(j+1)} = \hat{y}^{(j)} + \eta \cdot \text{tree's output}
+   $$
 
-   You can think of this as performing gradient descent on the predictions, where we have:
+      You can think of this as performing gradient descent on the predictions, where we have:
 
-$$
-y^{(\text{new})}_j = y^{(\text{old})}_j - \eta \cdot \frac{\partial L}{\partial y_j} \\
-= y^{(\text{old})}_j - \eta (\hat{y}^{(j)} - y^{(j)}) \\
-= y^{(\text{old})}_j - \eta \cdot (-r^{(j)}) \\
-= y^{(\text{old})}_j + \eta \cdot r^{(j)}
-$$
+   $$
+   y^{(\text{new})}_j = y^{(\text{old})}_j - \eta \cdot \frac{\partial L}{\partial y_j} \\
+   = y^{(\text{old})}_j - \eta (\hat{y}^{(j)} - y^{(j)}) \\
+   = y^{(\text{old})}_j - \eta \cdot (-r^{(j)}) \\
+   = y^{(\text{old})}_j + \eta \cdot r^{(j)}
+   $$
 
-   Note that the new indices of $y$ and $\hat{y}$ don't indicate an *updated prediction* by the same tree, but rather the set of predictions by the new, updated tree (the latest in the ensemble).
+      Note that the new indices of $y$ and $\hat{y}$ don't indicate an *updated prediction* by the same tree, but rather the set of predictions by the new, updated tree (the latest in the ensemble).
 
 5. Recurse steps 2 to 4 until convergence.
 
@@ -294,6 +318,17 @@ For example, if using the Gain Ratio + C4.5 method, we would:
 - Trees are invariant to monotonic transformations (don't need normalization).
 - We can now use trees to model more complex, non-linear data.
 - Work well with smaller datasets.
+
+## XGBoost
+
+Extreme Gradient Boosting is an implementation of Gradient-Boosted trees that's implemented in C++ and optimized for speed and performance. It includes several enhancements over basic gradient boosting, such as:
+
+- Regularization: XGBoost includes L1 and L2 regularization to prevent overfitting.
+- Automatically handles missing values during training
+- Tree pruning (via `max_depth` and `min_child_weight`) and parallelization for faster training.
+- Is easier to analyze since it contains a standardized interface and features.
+
+In practice, when we want to make a gradient-boosted tree, we just import the XGBoost library and use its built-in functions to create and train our model. It abstracts away the complexities of implementing gradient boosting from scratch, allowing us to focus on tuning hyperparameters and improving model performance.
 
 ## Random Forests
 
@@ -421,8 +456,6 @@ Common kernel functions include:
 - **Polynomial Kernel**: $K(x_i, x_j) = (x_i \cdot x_j + 1)^d$
 - **Radial Basis Function (RBF) Kernel**: $K(x_i, x_j) = \exp(-\gamma ||x_i - x_j||^2)$
 
-
-
 ## Multiclass Classification
 
 ![Multi-Class Classification Illustration](imgs/MCC.png)
@@ -479,58 +512,6 @@ It would be a shame to talk about classification methods without at least mentio
 
 When using k-NN, we take a point's features and look around at the k closest points in our training data. We then take a majority vote of those k points' labels to determine the label of our input point. it is a very simple algorithm, but it often works very well. Also, k-NN gives us an early and simplistic preview into unsupervised learning.
 
-## Project Structure
-
-```md
-Classification/
-└── imgs/
-├── README.md
-└── requirements.txt
-```
-
-## Installation & Setup
-
-### Prerequisites
-
-- Python 3.8+
-- Git
-
-### Setup
-
-Clone this repo:
-
-```bash
-git clone https://github.com/intelligent-username/Classification
-cd Classification
-```
-
-Create a virtual environment (recommended):
-
-```bash
-python -m venv venv
-```
-
-Activate the virtual environment:
-
-- On Windows:
-  ```bash
-  venv\Scripts\activate
-  ```
-- On macOS/Linux:
-  ```bash
-  source venv/bin/activate
-  ```
-
-Install the required packages:
-
-```bash
-pip install -r requirements.txt
-```
-
-Run the project:
-
-```bash
-python src/main.py
-```
+---
 
 This project is licensed under the [MIT License](LICENSE).
