@@ -11,7 +11,6 @@ In classification, we have some information and we want to *label* it as part of
   - [Logistic Function (Sigmoid)](#logistic-function-sigmoid)
   - [Negative Log-Likelihood](#negative-log-likelihood)
   - [Gradient Descent](#gradient-descent)
-
 - [Decision Trees](#decision-trees)
   - [Splitting Criteria](#splitting-criteria)
   - [Entropy & ID3](#entropy--id3)
@@ -19,23 +18,18 @@ In classification, we have some information and we want to *label* it as part of
   - [Gini Impurity & CART](#gini-impurity--cart)
   - [Making Predictions](#making-predictions)
   - [Limitations](#limitations)
-
 - [Gradient-Boosted Trees](#gradient-boosted-trees)
   - [Process](#process)
   - [How to do step 3](#how-to-do-step-3)
   - [Key Properties](#key-properties)
-
 - [XGBoost](#xgboost)
-
 - [Random Forests](#random-forests)
-
 - [Support Vector Machine](#support-vector-machine)
-
 - [Multiclass Classification](#multiclass-classification)
   - [Strategies for Multiclass SVMs](#strategies-for-multiclass-svms)
   - [Multiclass Logistic Regression](#multiclass-logistic-regression)
   - [Decision Trees and Ensembles](#decision-trees-and-ensembles)
-
+- [Clustering](#clustering)
 - [k-Nearest Neighbours](#k-nearest-neighbours)
 
 ## Introduction
@@ -357,7 +351,7 @@ Each tree is a weak, high-variance model, but combining them reduces variance by
 
 When working with a support vector machine (SVM), we try to find the best way to separate our classes. This means forming a line, 2D plane, or etc. to model a boundary. The hyperplane is formed through two **support vectors**. The best hyperplane is the one that maximizes the margin between the two classes. The margin is defined as the distance between the hyperplane and the closest points from each class, which are called support vectors.
 
-To use an SVM, we simply plot the unlabeled data point and see which side of the hyperplane it's on. But first, we need to understand how the more basic versions of it work.
+To use an SVM, we simply plot the unlabelled data point and see which side of the hyperplane it's on. But first, we need to understand how the more basic versions of it work.
 
 ### Terminology
 
@@ -504,11 +498,136 @@ where $y_{ik}$ is 1 if sample $i$ belongs to class $k$, 0 otherwise.
 
 Decision trees, random forests, and gradient-boosted trees naturally handle multiple classes without modification. Each leaf simply stores the most frequent class among the training samples that reach it. During prediction, the path from root to leaf determines the predicted class.
 
+## Clustering
+
+Extending the idea of distinguishing between classes based on features, we can also perform clustering, which is an **unsupervised learning** technique. Clustering is when we have a bunch of unlabelled data and we group data with similar features together into the same cluster. It's like an extension of classification, where we rely on the structure of the data itself to find who belongs where.
+
+So far, we've only talked about supervised learning, where we have labels to guide our models.
+
+Although this opens up a whole new field of machine learning, it's worth mentioning since it stems from classification and is very important in common tasks such as efficient searching for [RAG](https://github.com/intelligent-username/RAG).
+
+Some of the most common clustering techniques include:
+
+### Agglomerative
+
+The agglomerative clustering   technique is a bottom-up approach. Start by treating each data point as its own cluster. Then, iterate through each point.
+
+During each iteration, merge the two clusters that are closest together according to some distance metric. This process continues until all points are merged into a single cluster, forming a tree-like structure called a *dendrogram*.
+
+![A dendrogram resulting from agglomerative clustering](imgs/dendo.png)
+
+The key idea is that we can “cut” this tree at different levels to obtain different numbers of clusters. So, when searching for $k$ clusters, we can cut the dendrogram at the level that results in $k$ distinct clusters.
+
+The problem with the dendrogram is that it takes $O(n^2)$ space, which is not feasible for large datasets. To solve this, we can use a more efficient data structure called a **priority queue** to keep track of the closest clusters and merge them in $O(n \log n)$ time. Still, this is complicated to search through, taking $O(n^2)$ in the worst case and $O(n \log n)$ in the best case, so we often use other clustering techniques for large datasets.
+
+### k-Means
+
+k-Means is the most common and important clustering algorithm.
+
+We choose $k$ means and partition the vector space into $k$ regions, each associated with a centroid (mean). Then, we repeatedly move the centroids to the mean of the points in their region and reassign points to the nearest centroid until convergence.
+
+The algorithm works as follows:
+
+1. Initialize $k$ centroids randomly.
+2. Assign each point to the nearest centroid.
+3. Recompute each centroid as the mean of the points assigned to it.
+4. Repeat steps 2–3 until convergence.
+
+![k-Means Demonstration](imgs/kmeans.gif)
+
+Mathematically, we're just trying to minimize the total within-cluster variance:
+
+$$
+\sum_{i=1}^{N} |x_i - \mu_{c(i)}|^2
+$$
+
+Where $\mu_{c(i)}$ is the centroid of the cluster that point $x_i$ belongs to.
+
+Once the centroids are roughly at the centre of their respective clusters, the categorization is said to have 'converged', and the algorithm ends.
+
+A method called kmeans++ improves the convergence this by randomizing where the centroids are initialized.
+
+k-Means assumes that clusters actually *exist*, are roughly spherical, and are evenly sized. Without these assumptions, it may loop forever or simple fail to optimize.
+
+### DBScan
+
+DBScan (Density-Based Spatial Clustering of Applications with Noise) is a **density-based** clustering algorithm. It's simimlar to k-Means, except, instead of choosing $k$ centroids and moving them around, we choose a density $r$ and a minimum number of points $minPts$, and we group points together based on how many neighbours they have within that radius.
+
+A cluster is formed by connecting points that are within $\varepsilon$ distance of each other and have at least $\text{minPts}$ neighbours. This way, points that are closely densely packed together will form clusters, while points that are isolated will be considered outliers and excluded from any cluster.
+
+In the algorithm, we have two main hyperparameters:
+
+- $\varepsilon$: the radius of a neighbourhood
+- $\text{minPts}$: the minimum number of points required to form a dense region
+
+Points are classified as:
+
+- **Core points**: have at least $\text{minPts}$ points within $\varepsilon$
+- **Border points**: are close to a core point but don’t meet the density requirement themselves
+- **Noise points**: do not belong to any cluster
+
+The algorithm goes as follows:
+
+- Start with an unvisited point.
+- Look around this point. If it has $\text{minPts}$ neighbours within $\varepsilon$, it’s a core point and we start a new cluster.
+- If it is a border point, we add it to the cluster of the nearest core point.
+- If it's a core point, we recursively visit all its neighbours and add them to the cluster if they are core or border points.
+
+Once a cluster is 'exhausted' (i.e., all its core points have been visited), we move on to the next unvisited point and repeat the process until all points have been visited.
+
+If the first point we encounter ends up not being a core point, we simply move on (it's effectively marked as noise).
+
+![DBScan Illustration](imgs/dbscan2.gif)
+
+In higher dimensions, we simply just scale up the search to use $r$ as the radius of a hypersphere.
+
+DBSCAN is able to cluster together clusters that have arbitrary shapes.
+
+![DBScan Illustration](imgs/dbscan.gif)
+
+DBSCAN is a very clean, dynamic, and robust way to cluster irregular data, and it can also handle noise.
+
+However, it's sensitive to its hyperparameters $\varepsilon$ and $\text{minPts}$.
+
+### GMM
+
+Gaussian Mixture Models (GMMs) take a **probabilistic approach** to clustering. Instead of starting with a 'centroid esitmator' and improving on it, we assume that the points are randomly generated from a mixture of several Gaussian distributions.
+
+Instead of assigning each point to a cluster, we assume the points come from $K$ total clusters. We then try to find the most like estimators of the parameters of these distributions.
+
+Each of the $K$ components has three parameters:
+
+- $\mu_k$: the mean (centre of the distribution)
+- $\Sigma_k$: the covariance matrix (shape and orientation of the ellipse)
+- $\pi_k$: the mixing weight (what fraction of the data this component explains), where $\sum_k \pi_k = 1$
+
+The full model is:
+
+$$
+p(x) = \sum_{k=1}^{K} \pi_k \, \mathcal{N}(x \mid \mu_k, \Sigma_k)
+$$
+
+So, the probability of observing a specific point $x$ is the weighted sum of the probabilities from each component $\pi_k$.
+
+After initializing these values randomly, the  **Expectation-Maximization (EM)** algorithm is used to iteratively optimize them:
+
+1. **E-step**: for each point $x_i$, compute the *responsibility* $r_{ik}$.
+2. **M-step**: update each component's $\mu_k$, $\Sigma_k$, and $\pi_k$ as the responsibility-weighted mean, covariance, and weight over all points.
+3. Repeat until the change in log-likelihood falls below a threshold.
+
+The result is soft assignments: each point belongs to every cluster with some probability, rather than being hard-assigned to one.
+
+![Gaussian Mixture Model](imgs/gmm.gif)
+
+In summary, GMM is like a more expressive form of k-Means. Its can fit more complex clusters (like ellipses instead of circles) and provides probabilistic cluster memberships. However, because it's more complex, it may be heavily and inaccurately skewed due to outliers
+
+![Gaussian Mixture Model Illustration](imgs/gmm.gif)
+
 ## k-Nearest Neighbours
 
 ![k-NN Illustration](imgs/kNN.png)
 
-It would be a shame to talk about classification methods without at least mentioning k-nearest neighbours. It's not very closely related to any of the other methods we've discussed, but it's so effective that one cannot ignore it.
+It would be a shame to talk about classification methods without at least mentioning k-nearest neighbours. It's not very closely related to any of the other methods we've discussed, but it's so effective that one cannot ignore it. It's the 'laziest' form of classification, since it doesn't even try to learn a model. Instead, it just looks at the training data and makes predictions based on the closest points. Almost like an in-between of clustering and forests.
 
 When using k-NN, we take a point's features and look around at the k closest points in our training data. We then take a majority vote of those k points' labels to determine the label of our input point. it is a very simple algorithm, but it often works very well. Also, k-NN gives us an early and simplistic preview into unsupervised learning.
 
