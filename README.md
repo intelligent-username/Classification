@@ -136,22 +136,22 @@ In other words, our entropy measures the *opposite* of how confident we are in o
 To do this, we use the concept of *information gain*. Information gain is how much our confidence increases (how much entropy decreases) after a certain operation is performed. The ID3 algorithm works with this concept to recursively build our decision trees. Its steps are:
 
 1. Starting at the current root node, calculate the entropy.
-2. Look at all the candidate features and split the dataset on each feature.
-3. For each split, calculate the *new* expected entropy, using the same formula as step 1, this time finding the weighted average. $$   H_{new} = \sum_{j=1}^{M} \frac{|S_j|}{|S|} H(S_j) $$
 
-   $M$ is the number of splits, $S_j$ is the set of samples in split $j$, and $|S|$ is the total number of samples at the current node.
+2. Look at all the candidate features and split the dataset on each feature.
+
+3. For each split, calculate the *new* expected entropy, using the same formula as step 1, this time finding the weighted average.
+
+$$H_{new} = \sum_{j=1}^{M} \frac{|S_j|}{|S|} H(S_j)$$
+
+where $M$ is the number of splits, $S_j$ is the set of samples in split $j$, and $|S|$ is the total number of samples at the current node.
 
 4. Choose the split that results in the highest information gain (i.e., with the lowest entropy):
 
-   $$
-   \text{IG} := \text{Information Gain} = H(S) - H_{j}
-   $$
+$$\text{IG} := \text{Information Gain} = H(S) - H_{j}$$
 
-   Where $j$ is each possible split (at a given depth) and $\text{IG}$ is the list of information gains.
+$$\text{NS} := \text{NewSplit} = \max \text{IG}$$
 
-   $$
-   \text{NS} := \text{NewSplit} = \max \text{IG}
-   $$
+where $j$ is each possible split (at a given depth) and $\text{IG}$ is the list of information gains.
 
 5. Now, each split will create child nodes. Recurse by making each child node the new root and repeating steps 1-5 until it's time to stop.
 
@@ -245,46 +245,27 @@ Instead of building a single, deep tree, we build many small trees one after ano
 
 1. **Start** with a single tree that predicts all outputs roughly. Often, this just means taking the mean of the target's values and making that the initial prediction.
 
-    The prediction can be written as $\hat{y}^{(0)} = \frac{1}{N} \sum_{i=1}^{N} y_i$
+$$\hat{y}^{(0)} = \frac{1}{N} \sum_{i=1}^{N} y_i$$
 
-    (Note that the 0 is not exponentiation but the iteration index.)
-
-    At this point in the iteration, we just have a tree with a single leaf.
-
-    Note: if we are classifying, then there is no clear 'average', we instead use the log-odds of the positive class proportion, $\log\left(\frac{p}{1-p}\right)$.
-
-    So, in other words, when we're predicting some continuous value, we always guess the mean, and when we're classifying, we always predict that the input has $log\left(\frac{p}{1-p}\right)$ chance of being in the positive class.
+(Note that the 0 is not exponentiation but the iteration index.) At this point in the iteration, we just have a tree with a single leaf. For classification, we instead use the log-odds of the positive class proportion: $\log\left(\frac{p}{1-p}\right)$.
 
 2. **Compute the residuals** (prediction vs. ground truth for every sample).
 
-    The residual for each sample can be calculated as:
+$$r^{(j)} = y^{(j)} - \hat{y}^{(j)}$$
 
-   $$
-   r^{(j)} = y^{(j)} - \hat{y}^{(j)}
-   $$
-
-   Where $j$ is the current iteration of the boosting process and $y$ is the true label.
-
-   This calculation is done for every sample. Notice that we don't square or take the absolute value of the errors, instead we want to keep track of how much each prediction strayed from the truth.
+where $j$ is the current iteration of the boosting process and $y$ is the true label. This calculation is done for every sample. Notice that we don't square or take the absolute value of the errors; we want to keep track of how much each prediction strayed from the truth.
 
 3. Train a new tree to predict *these* residuals. We train on the residuals in order to understand what we're doing wrong in the current ensemble (group) of trees and move in the opposite direction.
 
 4. Add this tree’s predictions to the previous ones, scaled by a learning rate $\eta$:
 
-   $$
-   \hat{y}^{(j+1)} = \hat{y}^{(j)} + \eta \cdot \text{tree's output}
-   $$
+$$\hat{y}^{(j+1)} = \hat{y}^{(j)} + \eta \cdot \text{tree's output}$$
 
-      You can think of this as performing gradient descent on the predictions, where we have:
+You can think of this as performing gradient descent on the predictions:
 
-   $$
-   y^{(\text{new})}_j = y^{(\text{old})}_j - \eta \cdot \frac{\partial L}{\partial y_j} \\
-   = y^{(\text{old})}_j - \eta (\hat{y}^{(j)} - y^{(j)}) \\
-   = y^{(\text{old})}_j - \eta \cdot (-r^{(j)}) \\
-   = y^{(\text{old})}_j + \eta \cdot r^{(j)}
-   $$
+$$y^{(\text{new})}_j = y^{(\text{old})}_j - \eta \cdot \frac{\partial L}{\partial y_j} = y^{(\text{old})}_j - \eta (\hat{y}^{(j)} - y^{(j)}) = y^{(\text{old})}_j - \eta \cdot (-r^{(j)}) = y^{(\text{old})}_j + \eta \cdot r^{(j)}$$
 
-      Note that the new indices of $y$ and $\hat{y}$ don't indicate an *updated prediction* by the same tree, but rather the set of predictions by the new, updated tree (the latest in the ensemble).
+The new indices of $y$ and $\hat{y}$ don't indicate an *updated prediction* by the same tree, but rather the set of predictions by the new, updated tree (the latest in the ensemble).
 
 5. Recurse steps 2 to 4 until convergence.
 
